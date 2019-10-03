@@ -10,10 +10,10 @@
 clear, clc; close all; drawnow;
 
 % Choose functions to run
-run_Tiling_YN = 0;
-run_Decode_YN = 1;
-run_Threshold_YN = 1;
-run_Plotting_Global_YN = 1;
+run_Tiling_YN = 1;
+run_Decode_YN = 0;
+run_Threshold_YN = 0;
+run_Plotting_Global_YN = 0;
 %================================================
 % set parameters
 %----------------------------
