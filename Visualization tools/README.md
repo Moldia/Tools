@@ -3,4 +3,7 @@ Few visualization tools are available for analizing the data. They have been div
 - **Clustering and Binning**: characterizes genetically specific regions of a tissue
 
 
-![s](https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Binning%20%26%20Clustering/output_example/HexbinClustering.png = 100x20)
+![s](https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Binning%20%26%20Clustering/output_example/HexbinClustering.png)
+
+
+- **Colocalization**: checks for colocalization of the desired genes
