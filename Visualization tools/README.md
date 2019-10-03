@@ -7,3 +7,5 @@ Few visualization tools are available for analizing the data. They have been div
 
 
 - **Colocalization**: checks for colocalization of the desired genes
+
+![s](https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Colocalization/Output/Dissimilarity_test.png)
