@@ -13,5 +13,6 @@ Few visualization tools are available for analizing the data. They have been div
 - **Simple plot Visualization**: represent simple plots over a background image
 
 
-https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Simple%20Visualization%20plots/output_example/TransparentPlot.png
+![s](https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Simple%20Visualization%20plots/output_example/TransparentPlot.png)
+
 
