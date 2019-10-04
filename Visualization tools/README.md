@@ -12,7 +12,8 @@ Few visualization tools are available for analizing the data. They have been div
 
 - **Simple plot Visualization**: represent simple plots over a background image
 
-
 ![s](https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Simple%20Visualization%20plots/output_example/TransparentPlot.png)
 
+- **Region of interès**: allows analizing specific regions of the image, either one specific organoid, tissue or cells
 
+![s](https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Analize%20Region%20of%20Interests/output_example/RemoveReadsOutside.png)
