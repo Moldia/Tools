@@ -9,3 +9,10 @@ Few visualization tools are available for analizing the data. They have been div
 - **Colocalization**: checks for colocalization of the desired genes
 
 ![s](https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Colocalization/Output/Dissimilarity_test.png)
+
+- **Simple plot Visualization**: represent simple plots over a background image
+
+
+![s](https://github.com/Moldia/Tools/blob/master/Visualization%20tools/Simple%20Visualization%20plots/output_example/TransparentPlot.png)
+
+
