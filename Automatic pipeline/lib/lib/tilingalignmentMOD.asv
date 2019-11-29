@@ -1,0 +1,318 @@
+%% Version 2 (beta) aligns all Bases with the automatically selected
+% reference image for a batch of samples.
+% 2019-09-20, Erik Samuelsson & Sergio Marco
+% Developed at Molecular Diagnostic group, SciLifeLab, Stockholm University
+% Updates: now includes a prompt that allows the user to change the
+% selected refereance image if desired.
+tic
+    clear;
+    close all;
+%% Prompt user for number of channels, bases --> decides number of loops
+% Prompt user for image file paths
+
+    prompt = {'Enter the number of Bases:','Enter the number of channels:'...
+        ,'Enter the file path of the folder containing all of the images for analysis (Ending in \):',...
+        'Enter the channel number for the DAPI stain:',...
+        'Enter the number of samples to be processed:','Enter the tile size',....
+        'Enter Tile Channel 1','Enter Tile Channel 2','Enter Tile Channel 3',...
+        'Enter Tile Channel 4','Enter Tile Channel 5','Enter Tile Channel 6'};
+    dlg_title = 'Input';
+    num_lines = 1;
+     defaultans = {'3','6','E:\Bad Reference base selection'...
+        ,'1','1','2000','Nuclei','General_stain','T','G','C','A',};
+    answer = inputdlg(prompt,dlg_title,num_lines,defaultans);
+    number_bases = str2double(cell2mat(answer(1)));
+    number_channels = str2double(cell2mat(answer(2)));
+    filepath_samples = char(answer(3));
+    DAPI_channel = str2double(cell2mat(answer(4)));
+    samples =  str2double(cell2mat(answer(5)));
+    tile_size = str2double(cell2mat(answer(6)));
+    tile_channel_1 = char(answer(7));
+    tile_channel_2 = char(answer(8));
+    tile_channel_3 = char(answer(9));
+    tile_channel_4 = char(answer(10));
+    tile_channel_5 = char(answer(11));
+    tile_channel_6 = char(answer(12));
+   
+   
+ prompt = {'Subsections to align on each image (nXn)','Enter Reference base'...
+        'Enter path of to the OUTPUT folder','Maximum number of pixel shift allowed','Do you want tiling? (Y/N)'};
+    dlg_title = 'Input page 2';
+    num_lines = 1;
+     defaultans = {'5','2'...
+        ,'E:\Bad Output path selection','200','Y'};
+    answer = inputdlg(prompt,dlg_title,num_lines,defaultans);
+    totaltiles = str2double(answer(1));
+    reference_base = str2double(answer(2));
+    OUTPUT_FOLDER = char(answer(3));
+    MAXIM_PIXEL=str2double(answer(4)); % Maximum disalignment possible
+    want_tiling=char(answer(5))    
+    
+    
+%Other parameters that should't be modified   
+gap=round(MAXIM_PIXEL/4,0) %The gap between comparisons. gap=1 is the most precise. gap>1 gives faster approaches.
+INPUT_FOLDER_REF=filepath_samples;
+INPUT_FOLDER_FLO=filepath_samples;
+%FLOAT_FILE='Base 1_c1.tif';
+
+%Max pixel/gap has to be an entire number
+movx=0;
+movy=0;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%Parameters present before in function%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% downscaling the images due to RAM limitations
+ref_image_prefix=['Base ' num2str(reference_base) '_c'];
+ref_image = imread([INPUT_FOLDER_FLO ref_image_prefix num2str(DAPI_channel) '_ORG.tif']);
+ref_image_re = ref_image;
+
+chan=[1:number_bases];
+chan=chan(chan~=(reference_base))
+
+
+for w=chan
+input_image_prefix=['Base ' num2str(w) '_c']
+flo_image = imread([INPUT_FOLDER_FLO input_image_prefix num2str(DAPI_channel) '_ORG.tif']);
+%ref_image_re = imresize(ref_image, 0.5);
+%flo_image_re = imresize(flo_image, 0.5);
+ref_image='190816_r1c1_SBL(2)-mip-stitched-Subset-01_1_c1.tif';
+flo_image='190819_r1c1_SBL_TxRd(1)-mip-stitched-Subset-01_1_c1.tif';
+
+
+flo_image_re = flo_image;
+% RAM management
+clear ref_image;
+clear flo_image;
+
+% resizing the floating image to be the same dimensions as the reference
+% image
+
+
+%Image resizing
+[rows_ref, cols_ref] = size(ref_image_re);
+[rows_flo, cols_flo] = size(flo_image_re);
+
+tilewidth=round(0.1*((rows_ref+cols_ref)/2),0)
+xtilewidth=round(0.1*((cols_ref)),0)
+ytilewidth=round(0.1*((rows_ref)),0)
+float_fit = flo_image_re;
+%float_fit = imresize(flo_image_re, [rows_ref cols_ref]);
+if rows_flo > rows_ref 
+float_fit = float_fit(1:rows_ref,:);
+else
+ref_image_re = ref_image_re(1:rows_flo,:);    
+end
+
+if cols_flo > cols_ref 
+float_fit = float_fit(:,1:cols_ref);
+else
+ref_image_re = ref_image_re(:,1:cols_flo); 
+end
+
+
+% RAM management 
+clear flo_image_re; 
+
+
+%% 
+
+size(ref_image_re);
+size(float_fit);
+[Xlim,Ylim]=size(float_fit);
+
+xleftotal=[]
+yuptotal=[]
+
+tt=totaltiles;
+
+TOTAL=[]
+
+%%
+%HERE RUN AGAIN
+
+for i =1:(tt);
+for s=1:(tt);
+ 
+[Xlim,Ylim]=size(float_fit);
+xMax_width=ytilewidth;
+yMax_width=xtilewidth;
+ref_tile=ref_image_re(round(Xlim/(tt+1),0)*i:(round(Xlim/(tt+1),0)*i)+xMax_width,round(Ylim/(tt+1),0)*s:round((Ylim/(tt+1)),0)*s+yMax_width);
+float_tile=float_fit(round(Xlim/(tt+1),0)*i:(round(Xlim/(tt+1),0)*i)+xMax_width,round(Ylim/(tt+1),0)*s:round((Ylim/(tt+1)),0)*s+yMax_width);
+size(ref_tile)
+size(float_tile)
+if (sum(sum(float_tile))/tilewidth> 200000) & (sum(sum(ref_tile))/tilewidth> 200000)
+[xleft,yup] = region(ref_tile,float_tile,MAXIM_PIXEL,number_channels,input_image_prefix,OUTPUT_FOLDER,gap,movx,movy);
+xleft=xleft(1);
+yup=yup(1);
+xleftotal=[xleftotal,xleft];
+yuptotal=[yuptotal,yup];
+TOTAL=[TOTAL,sum(sum(ref_tile))/ 2000];
+else
+xleftotal=[xleftotal,0];
+yuptotal=[yuptotal,0];
+TOTAL=[TOTAL,0];    
+end 
+end
+end
+RESULT=[TOTAL',xleftotal',yuptotal']
+xleft=xleft(xleft~=0)
+yup=yup(yup~=0)
+xleft=round(median(xleftotal),0)
+yup=round(median(yuptotal),0)
+
+RESULT=[TOTAL',xleftotal',yuptotal']
+for c = 1:number_channels
+    %Ifuse_translate = translateimage(xleft, yup, float_fit, ref_image_re);
+    angle=0;
+    %figure;imshow(Ifuse_translate);
+    flo = imread([INPUT_FOLDER_REF input_image_prefix num2str(c) '_ORG.tif']);
+    transformimage(flo,angle,yup,xleft,10,...;
+    [OUTPUT_FOLDER input_image_prefix num2str(c) '_ALI.tif' ],size(ref_image_re));
+
+
+
+end
+
+xleftotal
+yuptotal
+TOTAL
+%Just for correlation
+corres=corr2(float_fit((MAXIM_PIXEL+abs(movx)+1+xleft+movx:(Xlim-(MAXIM_PIXEL+abs(movx)+1)+xleft+movx)),(MAXIM_PIXEL+1+yup+abs(movy)+movy:(Ylim-(MAXIM_PIXEL+abs(movy))-1+yup+movy)))...
+    ,ref_image_re((MAXIM_PIXEL+abs(movx))+1:(Xlim-(MAXIM_PIXEL+abs(movx)+1)),(MAXIM_PIXEL+abs(movy))+1:(Ylim-(MAXIM_PIXEL+abs(movy)+1))))
+
+end
+
+
+
+
+
+
+
+%Tiling_images
+if want_tiling == 'Y' 
+t.folder_image = [filepath_samples '\Aligned_Images_Rigid'];
+    t.filename_base_prefix = 'Base ';  % keep single quote marks
+    t.filename_channel_prefix = '_c';
+        t.in_subfolder_YN = 0;
+    t.filename_suffix = '_ORG.tif';
+    t.base_start = 1;     t.base_end = number_bases;       
+    t.channel_start = 1;  t.channel_end = number_channels;
+    t.tile_size = tile_size;
+    t.channel_order = {tile_channel_1 tile_channel_2 tile_channel_3...
+        tile_channel_4 tile_channel_5 tile_channel_6};
+    t.CSV_filename_prefix = 'Tiled';
+    seqtiling(t);  
+
+else
+    disp('Tiling will NOT be done, as specified by the user')
+    
+end
+
+%End of the part to modify in the script
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%Here comes%%%the%functions%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%function%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [xleft,yup] = region(ref_image_re,float_fit,MAXIM_PIXEL,number_channels,input_image_prefix,OUTPUT_FOLDER,gap,movx,movy);
+
+
+[Xlim,Ylim]=size(float_fit);
+max_dis=MAXIM_PIXEL ;
+
+%Function calling 1st time
+
+[startx,starty,float_fit, ref_image_re]=ALIGN(ref_image_re,float_fit,Xlim,Ylim,max_dis,number_channels,input_image_prefix,...
+    MAXIM_PIXEL,OUTPUT_FOLDER,gap,movy,movx)
+
+MAXIM_PIXEL=gap;
+gap=round(gap/2,0);
+movy=starty;
+movx=startx;
+
+while gap>1
+[startx,starty,float_fit, ref_image_re]=ALIGN(ref_image_re,float_fit,Xlim,Ylim,max_dis,number_channels,input_image_prefix,...
+    MAXIM_PIXEL,OUTPUT_FOLDER,gap,movy,movx);
+
+
+MAXIM_PIXEL=gap;
+gap=round(gap/2,0);
+angle=0;
+movy=movy+starty+1
+movx=movx+startx+1
+
+end 
+
+if gap == 1
+[startx,starty,float_fit, ref_image_re]=ALIGN(ref_image_re,float_fit,Xlim,Ylim,max_dis,number_channels,input_image_prefix,...
+    MAXIM_PIXEL,OUTPUT_FOLDER,gap,movy,movx);
+
+end
+angle=0;
+yup=movy+starty+1;
+xleft=movx+startx+1;
+%xleft=xleft(1);
+%yup=yup(1);
+
+end
+
+function [startx,starty,float_fit, ref_image_re] = ALIGN(ref_image_re,float_fit,Xlim,Ylim,max_dis,number_channels,input_image_prefix,...;
+    MAXIM_PIXEL,OUTPUT_FOLDER,gap,movy,movx);
+
+max_dis=MAXIM_PIXEL ;
+%modify here
+results=[];
+resultot=[];
+
+%This loops moves the float image arround the Reference one, getting the
+%best oneç
+
+for yup = -max_dis:gap:max_dis
+    for xleft =-max_dis:gap:max_dis
+    corres=float_fit((max_dis+abs(movx)+1+xleft+movx:(Xlim-(max_dis+abs(movx)+1)+xleft+movx)),(max_dis+1+yup+abs(movy)+movy:(Ylim-(max_dis+abs(movy))-1+yup+movy)))...
+    -ref_image_re((max_dis+abs(movx))+1:(Xlim-(max_dis+abs(movx)+1)),(max_dis+abs(movy))+1:(Ylim-(max_dis+abs(movy)+1)));
+  total=sum(corres);
+    addtotal=sum(total);
+    results=[results,addtotal];
+    end 
+   resultot=[resultot,results'];
+   results=[];
+end 
+minimum = min(min(resultot));
+[x,y]=find(resultot==minimum);
+
+x=-max_dis+((x-1)*gap);
+y=-max_dis+((y-1)*gap);
+
+%It plots the mesh plot
+%figure;mesh(resultot)
+
+
+%image
+yup=y;
+xleft=x;
+Ifuse_translate = translateimage(yup, xleft, float_fit, ref_image_re);
+starty=yup;
+startx=xleft;
+end
+
+
+
