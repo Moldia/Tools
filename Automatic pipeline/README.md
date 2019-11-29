@@ -9,5 +9,3 @@ In order to process the data, a single script called 'Next_pipeline_beta.m' is n
 # Important information
 The automatic pipeline is nowadays in a beta version. Therefore, if any there is any error during the processing, please contact sergiomarco.salas@scilifelab.se
 
-![s](https://github.com/Moldia/Tools/Tools/Automatic_pipeline/lib/Logo_Next_Pipeline.tif)
-
