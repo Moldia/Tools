@@ -1,6 +1,32 @@
 issues in image analysis
 
-[toc]
+- [1. javabridge issue on cp](#1-javabridge-issue-on-cp)
+  * [1.1 description](#11-description)
+  * [1.3 solution](#13-solution)
+- [2. issues with mipping and stitching](#2-issues-with-mipping-and-stitching)
+  * [2.1 description](#21-description)
+  * [2.3 solution](#23-solution)
+- [3. issues with the matlab path](#3-issues-with-the-matlab-path)
+  * [3.1 description](#31-description)
+  * [3.2 solution](#32-solution)
+- [4. issue with the automatic pipeline and mipping](#4-issue-with-the-automatic-pipeline-and-mipping)
+  * [4.1 description](#41-description)
+  * [4.2 solution](#42-solution)
+- [5. issues in the decoding - index exceeds the number of array elements](#5-issues-in-the-decoding---index-exceeds-the-number-of-array-elements)
+  * [5.1 description](#51-description)
+  * [5.2 solution](#52-solution)
+- [6. issues with a lot of nnnns](#6-issues-with-a-lot-of-nnnns)
+  * [6.1 description](#61-description)
+  * [6.2 solution](#62-solution)
+- [7. issues in the plotting, not seeing all the genes](#7-issues-in-the-plotting--not-seeing-all-the-genes)
+  * [7.1 description](#71-description)
+  * [7.2 solution](#72-solution)
+- [8. issues in format_for_starfish](#8-issues-in-format-for-starfish)
+  * [8.1 description](#81-description)
+  * [8.2 solution](#82-solution)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
 # 1. javabridge issue on cp
 ## 1.1 description 
 this issue is quite commonly occuring and it occurs in cp after a set of images have been processed. this is dependent on the computer but it can arise after 500 images or up to 700 images for instance. 
